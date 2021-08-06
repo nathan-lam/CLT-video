@@ -6,25 +6,67 @@ from scipy.stats import norm
 #python -m manim -p -ql CLT.py Claim
 from manim import Text
 
-
+#done
 class Claim(Scene):
     def construct(self):
-        start1 = MathTex(r'X_1,X_2,X_3...,X_n \overset{iid}{\sim} F')
-        start2 = MathTex(r"mean = \mu \text{ and } variance = \sigma^2 < \infty")
-        start = VGroup(start1, start2).arrange(DOWN)
 
-        start.scale_in_place(0.75)
-        start.to_corner(UP)
+        start = VGroup(
+            MathTex(r'\text{Central Limit Theorem}'),
+            MathTex(r'\text{if } X_1,X_2,X_3...,X_n \overset{iid}{\sim} F'),
+            MathTex(r"\text{with } mean = \mu \text{ and } variance = \sigma^2 < \infty"),
+            MathTex(r'\text{then } \lim_{n \to \infty} \frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}} \overset{d}{\rightarrow} Normal(0,1)')
+        ).arrange(DOWN, buff=1).to_corner(UP)
+
+        #IRL example
+        example = VGroup(
+            MathTex(r'X', r' = ', r'\text{\# rolled on a d6}'),
+            MathTex(r'X_1',', X_2 , X_3 , ... , X_n'),
+            MathTex(r'\bar{X}', r'=', r'\frac{X_1 + X_2 + X_3 + ... + X_n}{n}'),
+            MathTex(r'\text{big n} \rightarrow ', r'\bar{X}', r'\sim\text{Normal}'),
+            MathTex(r'\text{Independent and }', r'\text{Identically }', r'\text{Distributed}'),
+            MathTex(r'I',r'I',r'D')
+        )
 
         self.play(
             FadeIn(start, shift=DOWN)
         )
         self.wait()
 
-
-        start3 = MathTex(r'\sqrt{n}(\bar{X}-\mu)} \overset{d}{\rightarrow} \mathcal{N}(0,\sigma^2)')
+        self.play(FadeOut(start[1:]))
         self.play(
-            FadeIn(start3, shift=DOWN)
+            FadeIn(example[0])
+        )
+        self.wait()
+
+        self.play(
+            ReplacementTransform(example[0],example[1])
+        )
+        self.wait()
+
+        self.play(
+            ReplacementTransform(example[1],example[2])
+        )
+        self.wait()
+
+        example[3].next_to(example[2].get_center()+DOWN + 2.5*LEFT)
+        self.play(
+            Write(example[3])
+        )
+        self.wait()
+
+        #IID
+        example[4].move_to(1.75*DOWN)
+        for i in range(3):
+            self.play(FadeIn(example[4][i], shift=DOWN))
+        self.wait()
+
+        example[5].move_to(1.75*DOWN)
+        self.play(ReplacementTransform(example[4],example[5]))
+        self.wait()
+
+        self.play(
+            FadeOut(start[0]),
+            FadeOut(example[1:])
         )
         self.wait()
 
@@ -97,8 +139,8 @@ class Barchart_test(Scene):
 
     #end
 
-
-class Barchart_test2(Scene):
+#done
+class Simulation(Scene):
     def construct(self):
 
         variables = [2, 10, 100, 500]
@@ -115,7 +157,7 @@ class Barchart_test2(Scene):
         label = VGroup(num_label,num_sample)
         label.to_edge(UP)
 
-        axes1, graph1, points1, huhhh = self.get_graph(1)
+        axes1, graph1, points1 = self.get_graph(1)
 
         self.play(
             DrawBorderThenFill(axes1),
@@ -123,43 +165,42 @@ class Barchart_test2(Scene):
         )
         self.play(
             Create(graph1),
-            Write(points1))
+            ShowIncreasingSubsets(points1, run_time = 2))
         #rv += 1 #self.play(rv.animate.set_value(5)) to change continuously
         self.wait()
 
 
         for var in variables:
-            axes2, graph2, points2, huhhh = self.get_graph(var)
-
+            axes2, graph2, points2 = self.get_graph(var)
+            self.play(FadeOut(points1),)
+            self.wait()
             self.play(
                 rv.animate.set_value(var),
                 ReplacementTransform(axes1,axes2),
                 ReplacementTransform(graph1,graph2),
-                ReplacementTransform(points1,points2)
+                ShowIncreasingSubsets(points2, run_time = 2)
             )
             axes1, graph1, points1 = axes2, graph2, points2
             self.wait()
 
-        self.play(FadeOut(points1, shift=UP))
+        self.play(FadeOut(points1))
 
-        #simulating points over time
-        num_sim = 10
-        new_count = {}
-        data = self.get_unif_sample(m=batch_size, n=variables[-1])
-        sim_points1 = Dot(color=BLACK)
-        self.play(Write(sim_points1))
-
-        for n in range(num_sim):
-            new_count = self.CountFreq(new_count, data[(100*n):(99+100*n)])
-            xy = np.array([list(new_count.keys()), np.array(list(new_count.values()),dtype=float)])
-            sim_points2 = VGroup(*[Dot(axes1[0].c2p(i, j))
-                                  for i, j in zip(xy[0], xy[1]/batch_size)])
-            self.play(
-                ReplacementTransform(sim_points1,sim_points2)
-            )
-            sim_points1 = sim_points2
-            self.wait()
-
+        # #simulating points over time
+        # num_sim = 10
+        # new_count = {}
+        # data = self.get_unif_sample(m=batch_size, n=variables[-1])
+        #
+        #
+        # # for n in range(num_sim):
+        # #     new_count = self.CountFreq(new_count, data[(100*n):(99+100*n)])
+        # #     xy = np.array([list(new_count.keys()), np.array(list(new_count.values()),dtype=float)])
+        # #     sim_points2 = VGroup(*[Dot(axes1[0].c2p(i, j))
+        # #                           for i, j in zip(xy[0], xy[1]/batch_size)])
+        # #     self.play(
+        # #         ReplacementTransform(sim_points1,sim_points2)
+        # #     )
+        # #     sim_points1 = sim_points2
+        # #     self.wait()
 
 
     def get_graph(self, num_rv):
@@ -205,7 +246,7 @@ class Barchart_test2(Scene):
 
         inner_axes.to_edge(DOWN)
 
-        return inner_axes, inner_graph, inner_points,yy
+        return inner_axes, inner_graph, inner_points
 
 
 
@@ -575,38 +616,6 @@ class NormalMGF(Scene):
 
         #end
 
-
-class TestAlgebra(Scene):
-    def construct(self):
-        line = MathTex('A','+','B','+','C')
-        line2 = MathTex('D')
-        line3 = MathTex('E')
-        line4 = MathTex('F')
-
-
-        self.play(
-            Write(line)
-        )
-        self.wait(0.25)
-
-        line2.next_to(line[2].get_center())
-        self.play(
-            ReplacementTransform(line[2],line2)
-        )
-        self.wait()
-
-
-        line3.next_to(line[2].get_center())
-        self.play(
-            ReplacementTransform(line[2], line3)
-            )
-        self.wait()
-
-        line4.next_to(line[2].get_center())
-        self.play(
-            ReplacementTransform(line[2], line4)
-        )
-        self.wait()
 
 
 
