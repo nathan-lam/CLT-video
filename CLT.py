@@ -27,8 +27,12 @@ class Claim(Scene):
             MathTex(r'I',r'I',r'D')
         )
 
+        self.play(FadeIn(start[0]))
+        self.wait()
+
         self.play(
-            FadeIn(start, shift=DOWN)
+            start[0].animate.to_edge(UP),
+            FadeIn(start[1:], shift=DOWN)
         )
         self.wait()
 
@@ -143,7 +147,7 @@ class Barchart_test(Scene):
 class Simulation(Scene):
     def construct(self):
 
-        variables = [2, 10, 100, 500]
+        variables = [2, 10, 100, 500, 1000]
         batch_size = 1000
 
         #label of number of samples
@@ -165,7 +169,7 @@ class Simulation(Scene):
         )
         self.play(
             Create(graph1),
-            ShowIncreasingSubsets(points1, run_time = 2))
+            ShowIncreasingSubsets(points1, run_time = 1))
         #rv += 1 #self.play(rv.animate.set_value(5)) to change continuously
         self.wait()
 
@@ -178,7 +182,7 @@ class Simulation(Scene):
                 rv.animate.set_value(var),
                 ReplacementTransform(axes1,axes2),
                 ReplacementTransform(graph1,graph2),
-                ShowIncreasingSubsets(points2, run_time = 2)
+                ShowIncreasingSubsets(points2, run_time = 1)
             )
             axes1, graph1, points1 = axes2, graph2, points2
             self.wait()
@@ -293,7 +297,7 @@ class MGF(Scene):
         exp2 = MathTex(r'M_X(t)', r'=', r'\frac{1}{0!}', r'+', r'\frac{E(X)t}{1!}', r'+',
                        r'\frac{E(X^2)t^2}{2!}', r'+',
                        r'\frac{E(X^3)t^3}{3!}', r'+', r'\ldots')
-        exp3 = MathTex(r'M_X(t)', r'=', r'E(', r'\frac{1}{0!}', r'+', r'\frac{Xt}{1!}', r'+',
+        exp3 = MathTex(r'M_X(t)', r'=', r'E(', r'\frac{(Xt)^0}{0!}', r'+', r'\frac{(Xt)^1}{1!}', r'+',
                        r'\frac{(Xt)^2}{2!}', r'+',
                        r'\frac{(Xt)^3}{3!}', r'+', r'\ldots', r')')
         exp4 = MathTex(r'M_X(t)', r'=', r'E(', r'e^{Xt}', r')')
@@ -762,5 +766,15 @@ class Sums(Scene):
             self.play(
                 ReplacementTransform(S[2+i],S[3+i])
             )
+            if i == 1:
+                self.play(
+                    FadeOut(ES[3]),
+                    FadeOut(varS[3]))
             self.wait()
 
+
+
+class Conclusion(Scene):
+    #why does this matter
+    def construct(self):
+        pass
