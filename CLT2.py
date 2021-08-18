@@ -112,7 +112,7 @@ class Intro(Scene):
 
 class Simulation(Scene):
     def construct(self):
-        variables = [2, 10, 100, 500, 1000]
+        variables = [2, 5, 50, 100, 1000]
         batch_size = 10000
 
         # label of number of samples
@@ -151,7 +151,13 @@ class Simulation(Scene):
             axes1, graph1, points1 = axes2, graph2, points2
             self.wait()
 
-        self.play(FadeOut(points1))
+        self.play(
+            FadeOut(points1),
+            FadeOut(axes1),
+            FadeOut(graph1),
+            FadeOut(label)
+        )
+        self.wait()
 
 
     def get_graph(self, num_rv, size):
@@ -465,7 +471,6 @@ class MGF2(Scene):
         self.play(
             FadeIn(product[0], shift=DOWN)
         )
-        self.wait()
 
         self.remove(product[0])
         # factor out expectation
@@ -475,10 +480,12 @@ class MGF2(Scene):
                                  product[1],
                                  transform_mismatches=True,
                                  key_map=dict({"e^{At})E(e^{Bt}": "e^{At}e^{Bt}"})
-                                 )
+                                 ),
+            run_time=0.5
         )
 
-        self.wait()
+
+
 
         # combine exponents
         self.play(
@@ -486,9 +493,9 @@ class MGF2(Scene):
                                  product[2],
                                  transform_mismatches=True,
                                  key_map=dict({"e^{At}e^{Bt}": "e^{At+Bt}"})
-                                 )
+                                 ),
+            run_time=0.5
         )
-        self.wait()
 
         # #factor exponent
         self.play(
@@ -496,9 +503,9 @@ class MGF2(Scene):
                                  product[3],
                                  transform_mismatches=True,
                                  key_map=dict({"e^{At+Bt}": "e^{(A+B)t}"})
-                                 )
+                                 ),
+            run_time=0.5
         )
-        self.wait()
 
         # #conclusion
         self.play(
@@ -508,27 +515,31 @@ class MGF2(Scene):
                                  key_map=dict({"e^{(A+B)t}": "M_{A+B}(t)",
                                                "(": "M_{A+B}(t)",
                                                ")": "M_{A+B}(t)"})
-                                 )
+                                 ),
+            run_time=0.5
         )
-        self.wait()
 
         # #clearing screen
         self.play(
             FadeOut(product[4], shift=UP),
+            run_time=0.5
         )
-        self.wait()
 
         # #adding in convergence property
         self.play(FadeIn(converge[0], shift=DOWN))
-        self.wait()
 
         self.play(TransformMatchingTex(converge[0].copy(), converge[1],
                                        key_map={
                                            "M_{A_n}(t)": "A_n",
                                            r"\rightarrow": r"\overset{d}{\rightarrow}",
                                            "M_B(t)": "B"}
-                                       )
+                                       ),
+            run_time=0.5
                   )
+
+        self.play(
+            FadeOut(converge)
+        )
         self.wait()
     # end
 
@@ -666,14 +677,41 @@ class NormalMGF2(Scene):
         )
         self.wait()
 
+        #show integral is equal to 1
+        b1 = Brace(RHS9[2:])
+        b1_text = b1.get_tex("Normal(t,1)")
+
+        b2 = Brace(RHS9[1:])
+        b2_text = b2.get_tex("= 1")
+
+        self.play(
+            FadeIn(b1, shift=DOWN),
+            FadeIn(b1_text, shift=DOWN)
+        )
+        self.wait()
+
+        self.play(
+            ReplacementTransform(b1,b2),
+            ReplacementTransform(b1_text,b2_text)
+        )
+        self.wait()
+
         # start line 10
-        self.play(FadeOut(RHS9[1:], shift=UP))
+        self.play(
+            FadeOut(RHS9[1:], shift=UP),
+            FadeOut(b2, shift=UP),
+            FadeOut(b2_text, shift=UP)
+        )
         self.wait(0.2)
 
         self.play(
             ReplacementTransform(LHS, line10[0]),
             ReplacementTransform(RHS9[0], line10[1])
         )
+        self.wait()
+
+        #back to black
+        self.play(FadeOut(line10))
         self.wait()
     # end
 
@@ -694,7 +732,7 @@ class Proof(Scene):
                     r')'),
             MathTex(r'M_{S^*}(t)', r'=', r'\prod\limits^{n}_{i=1}', r'E(', r'e^{\frac{(X_i - \mu)}{\sqrt{n\sigma^2}}t}',
                     r')'),
-            MathTex(r'M_{S^*}(t)', r'=', r'E(', r'(e^{(X - \mu)\frac{t}{\sqrt{n\sigma^2}}})^n', r')'),
+            MathTex(r'M_{S^*}(t)', r'=', r'[E(', r'e^{(X - \mu)\frac{t}{\sqrt{n\sigma^2}}}', r')]^n'),
             MathTex(r'M_{S^*}(t)', r'=', r'[M_{X-\mu}(\frac{t}{\sqrt{n\sigma^2}})]^n'),
             MathTex(r'M_{S^*}(t)', r'=',
                     r'[\frac{M_{X-\mu}(\frac{t}{\sqrt{n\sigma^2}} = a)}{0!} + '
@@ -732,7 +770,7 @@ class Proof(Scene):
                     r'[1 + \frac{t^2}{2n}]^n'
                     ),
             MathTex(r'\lim_{n \to \infty} M_{S^*}(t)', r'\approx',
-                    r'\lim_{n \to \infty}(1 + \frac{(\frac{t^2}{2})}{n})^n'
+                    r'\lim_{n \to \infty}[1 + \frac{(\frac{t^2}{2})}{n}]^n'
                     ),
             MathTex(r'\lim_{n \to \infty} M_{S^*}(t)', r'\approx',
                     r'e^{\frac{1}{2}t^2}'
@@ -756,6 +794,7 @@ class Proof(Scene):
             MathTex(r'Var(S)', r'=', r'nVar(X)'),
             MathTex(r'Var(S)', r'=', r'n\sigma^2')
         )
+
 
         self.play(FadeIn(title))
         self.wait()
@@ -824,3 +863,56 @@ class Proof(Scene):
                     FadeOut(varS[3]))
             self.wait()
     # end
+
+class Conclusion(Scene):
+    #why does this matter
+    def construct(self):
+        start = VGroup(
+            MathTex(r'X_1,X_2,...,X_n', r'\sim',r'F'),
+            MathTex(r'Uniform(a,b)',
+                    r'Binomial(n,p)',
+                    r'Poisson(\mu)',
+                    r'Geometric(p)',
+                    r'Gamma(\alpha, \beta)',
+                    r'Beta(\alpha, \beta)'),
+            MathTex(r'\overset{iid}{\sim}'),
+            MathTex(r'M_F(t)')
+        )
+        examples = VGroup(
+            Text('Paramter Estimation'),
+            Text('Confidence Intervals'),
+            Text('Hypothesis Testing')
+        ).arrange(DOWN)
+
+        self.play(Write(start[0]))
+        self.wait()
+
+        #no specific distribution
+        for i in range(6):
+            start[1][i].next_to(start[0][1], RIGHT)
+            self.play(
+                Transform(start[0][2], start[1][i])
+            )
+        self.wait()
+
+        #must be iif
+        start[2].move_to(start[0][1].get_center())
+        self.play(
+            Transform(start[0][1], start[2]),
+        )
+        self.wait()
+
+        #MGF must exist
+        start[3].next_to(start[0],DOWN)
+        self.play(
+            FadeIn(start[3],shift=DOWN)
+        )
+        self.wait()
+
+        self.play(
+            FadeOut(start[0]),
+            FadeOut(start[2:]),
+        )
+        self.wait()
+
+#put in final examples
