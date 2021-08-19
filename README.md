@@ -7,4 +7,7 @@ Start date:
 July 26, 2021
 
 End date:
-TBA
+Aug 18, 2021
+
+You can see the video here!
+https://youtu.be/G99ghz1Hekk
